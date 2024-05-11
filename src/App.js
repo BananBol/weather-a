@@ -1,25 +1,53 @@
-import logo from './logo.svg';
+import Form from './components/form/form';
+import Card from './components/card/card';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import './App.css';
+import Loading from './components/loading/loading';
+
 
 function App() {
+
+  const API_KEY = '317147e078c54d6c882102156230710'
+  const [weatherData, setWeatherData] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
+
+  const getWeather = async (city) => {
+    setIsLoading(true)
+    try {
+      const response = await axios.get(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}&aqi=no`)
+      setWeatherData(response.data)
+    } catch (error) {
+      if (error?.response?.status === 400) {
+        alert('В запросе есть синтаксическая ошибка')
+      } else if (error?.response?.status === 404) {
+        alert('Сервер не найден')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+   getWeather('Бишкек')
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <div className="container">
+       <Form
+         getWeather={getWeather}
+       />
+       {isLoading ? 
+       <Loading /> 
+       :
+       <Card
+         weatherData={weatherData}
+       />
+       }
+      </div>
+   );  
+
 }
 
 export default App;
+
